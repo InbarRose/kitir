@@ -1,3 +1,3 @@
-from environment import *
-import utils
+from .environment import *
+from . import utils
 # name = "kitir"
