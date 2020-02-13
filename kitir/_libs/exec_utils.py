@@ -284,6 +284,7 @@ def iexec(cmd, **kwargs):
     iexec_communicate = kwargs.pop('iexec_communicate', None)
     iexec_communicate_input = kwargs.pop('iexec_communicate_input', None)
     dump_kwargs = kwargs.pop('dump_kwargs', False)
+    text_mode = kwargs.pop('text_mode', True)
 
     if not isinstance(cmd, str):
         cmd = subprocess.list2cmdline(cmd)
@@ -315,7 +316,7 @@ def iexec(cmd, **kwargs):
         else:
             log.info(msg)
 
-    pkwargs = {'shell': True, 'stdout': subprocess.PIPE, 'stderr': subprocess.PIPE}
+    pkwargs = {'shell': True, 'stdout': subprocess.PIPE, 'stderr': subprocess.PIPE, 'text': text_mode}
     subprocess_kwargs = {}
     for arg in SUBPROCESS_KWARGS:
         if arg in kwargs and arg not in pkwargs:
@@ -447,7 +448,7 @@ def iexec(cmd, **kwargs):
         result.to_dump_file(dump_file, dump_file_rotate, dump_kwargs=dump_kwargs)
 
     if trace_file:
-        write_file(trace_file, contents=result.append_output(), mode='a')
+        write_file(trace_file, contents=result.append_output(), filemode='a')
 
     if pickle_result:
         with open(pickle_result, 'wb') as f:

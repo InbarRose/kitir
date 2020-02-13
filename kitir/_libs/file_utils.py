@@ -245,13 +245,14 @@ def get_tmp_dir(use_logging=True):
     return tmp_dir
 
 
-def write_to_tmp_file(content):
+def write_to_tmp_file(content, **kwargs):
     """
     writes the content to a temporary file
     :param content: the content to write (string)
     :return: returns the file_path
     """
-    with tempfile.NamedTemporaryFile(delete=False) as f:
+    kwargs.setdefault('mode', 'w+')
+    with tempfile.NamedTemporaryFile(delete=False, **kwargs) as f:
         f.write(content)
     return f.name
 
@@ -334,19 +335,19 @@ def file_rotation(file_name, rotate_rx='_rx_'):
     return file_name
 
 
-def write_file(file_name, contents=None, mode='w', rotate=False, **kwargs):
+def write_file(file_name, contents=None, filemode='w', rotate=False, **kwargs):
     """
     create, or append to a file, optionally with content, return file_name
     :param file_name:
     :param contents:
-    :param mode:
+    :param filemode:
     :param rotate:
     :return: the filename that was written
     """
     check_makedir(os.path.dirname(file_name))
     if rotate:
         file_name = file_rotation(file_name, rotate_rx=kwargs.get('rotate_rx', '_rx_'))
-    with open(file_name, mode) as f:
+    with open(file_name, filemode) as f:
         if contents:
             if isinstance(contents, list) and isinstance(contents[0], str):
                 f.writelines(contents)
@@ -357,18 +358,18 @@ def write_file(file_name, contents=None, mode='w', rotate=False, **kwargs):
     return file_name
 
 
-def read_file(file_name, mode='r', raise_on_error=True, as_str=False, strip_newlines=False):
+def read_file(file_name, filemode='r', raise_on_error=True, as_str=False, strip_newlines=False):
     """
     Read a file: by default read the lines f.readlines() or f.read() if as_str=True
     :param file_name: path of the file
-    :param mode: mode to read the file (r)
+    :param filemode: mode to read the file (r)
     :param raise_on_error: raise exception on read error
     :param as_str: return the contents as a string
     :param strip_newlines: return the contents as a list with no newlines: [l.strip('\n') for l in lines]
     :return: a list of lines or string
     """
     try:
-        with open(file_name, mode=mode) as f:
+        with open(file_name, mode=filemode) as f:
             if as_str:
                 content = f.read()
             else:
@@ -400,28 +401,30 @@ def write_csv(file_name, contents, headers=None, **kwargs):
     :param headers: specify headers, or take from contents
     :return: the filename that was written
     """
+    filemode = kwargs.pop('filemode', 'w')
     if isinstance(contents, dict):
         assert headers and len(headers) == 2
         contents = [{headers[0]: key, headers[1]: value} for key, value in contents.items()]
     headers = headers or contents[0].keys()
     log.trace('writing csv file: path={} headers={} rows={}'.format(file_name, headers, len(contents)))
     check_makedir(os.path.dirname(file_name))
-    with open(file_name, 'wb') as f:
+    with open(file_name, filemode) as f:
         writer = DictWriter(f, headers, **kwargs)
         writer.writeheader()
         writer.writerows(contents)
     return file_name
 
 
-def read_csv(file_name, return_headers=False):
+def read_csv(file_name, return_headers=False, **kwargs):
     """
     reads a csv file using DictReader and returns a rowdicts list
     :param file_name: path of the file
     :param return_headers: return value becomes (rows, headers)
     :return: rows read from csv
     """
+    filemode = kwargs.pop('filemode', 'r')
     log.trace('reading csv file: path={}'.format(file_name))
-    with open(file_name, 'rb') as f:
+    with open(file_name, filemode) as f:
         # verify file is not empty
         if not check_file_size(file_name):
             log.warning('csv file size is 0 bytes: csv={}'.format(file_name))
@@ -436,19 +439,20 @@ def read_csv(file_name, return_headers=False):
     return rows
 
 
-def iread_csv(file_name, return_headers=False):
+def iread_csv(file_name, return_headers=False, **kwargs):
     """
     iter-reads a csv file using DictReader and returns a rowdicts generator
     :param file_name: path of the file
     :param return_headers: first yield is the headers
     :return: rows read from csv as generator
     """
+    filemode = kwargs.pop('filemode', 'r')
     log.trace('reading csv file: path={}'.format(file_name))
     if not check_file_size(file_name):
         # verify file is not empty
         log.warning('csv file size is 0 bytes: csv={}'.format(file_name))
         raise StopIteration()
-    f = open(file_name, 'rb')
+    f = open(file_name, filemode)
     reader = DictReader(f)
     try:
         if return_headers:
@@ -515,10 +519,10 @@ def file_diff(file_a, file_b, output=None, **kwargs):
     :param kwargs: any kwargs
     :return:
     """
-    file_mode = kwargs.pop('file_mode', 'Urb')
+    filemode = kwargs.pop('filemode', 'Ur')
     if kwargs.pop('show_log', True):
         log.trace('performing file diff between two files: a={} b={}'.format(file_a, file_b))
-    with open(file_a, mode=file_mode) as af, open(file_b, mode=file_mode) as bf:
+    with open(file_a, mode=filemode) as af, open(file_b, mode=filemode) as bf:
         al = af.readlines()
 
         diff = list(difflib.unified_diff(
@@ -584,8 +588,10 @@ def format_file(filepath, raise_on_fail=True, **kwargs):
     :param kwargs:
     :return: returns True if success else False
     """
+    filemode_read = kwargs.pop('filemode_read', 'r')
+    filemode_write = kwargs.pop('filemode_write', 'w')
     try:
-        with open(filepath, 'r') as fr:
+        with open(filepath, filemode_read) as fr:
             content_before = fr.readlines()
     except Exception as exc:
         log.error('Exception reading file before format: filepath={} exc={}'.format(filepath, exc))
@@ -608,7 +614,7 @@ def format_file(filepath, raise_on_fail=True, **kwargs):
                     return False
             content_after.append(new_line)
         try:
-            with open(filepath, 'w') as fw:
+            with open(filepath, filemode_write) as fw:
                 fw.writelines(content_after)
         except Exception as exc:
             log.error('Exception writing file after format: filepath={} exc={}'.format(filepath, exc))
@@ -628,6 +634,8 @@ def replace_content_in_file(filepath, replacements, raise_on_fail=True, **kwargs
     :param kwargs:
     :return:
     """
+    filemode_read = kwargs.pop('filemode_read', 'r')
+    filemode_write = kwargs.pop('filemode_write', 'w')
     log.debug('Modifying file in-place: filepath={}'.format(filepath))
     backup_file = kwargs.pop('backup_file', None)
     return_success = kwargs.pop('return_success', True)
@@ -639,7 +647,7 @@ def replace_content_in_file(filepath, replacements, raise_on_fail=True, **kwargs
         smart_copy(filepath, backup_file)
 
     # read conf
-    contents = read_file(filepath)
+    contents = read_file(filepath, filemode=filemode_read)
 
     for idx, line in enumerate(contents[:]):
         # make new line so we can modify it
@@ -657,7 +665,7 @@ def replace_content_in_file(filepath, replacements, raise_on_fail=True, **kwargs
         new_content.append(new_line)
 
     # write conf
-    write_file(filepath, new_content)
+    write_file(filepath, new_content, filemode=filemode_write)
 
     # return success
     if return_success:

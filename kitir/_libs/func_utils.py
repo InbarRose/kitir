@@ -13,7 +13,7 @@ def get_func_name(func, raise_on_fail=True, raise_on_lambda=False):
     func_name = None
     if callable(func):
         try:
-            func_name = getattr(func, 'func_name', None)
+            func_name = getattr(func, 'func_name')
         except AttributeError:
             func_name = getattr(func, '__name__', None)
     elif raise_on_fail:

@@ -18,7 +18,7 @@ class Testiexec(unittest.TestCase):
     def test_dump_kwargs_true(self):
         # prepare dump output file
         tmp_file = os.path.join(utils.get_tmp_dir(), 'test_dump_kwargs_true.dump.txt')
-        utils.check_makedir(tmp_file)  # make sure path is clear for writing
+        utils.check_makedir(os.path.dirname(tmp_file))  # make sure path is clear for writing
         utils.clean_paths(tmp_file)
         # prepare command
         cmd = 'hostname'  # works on all machine types?
@@ -52,7 +52,7 @@ class Testiexec(unittest.TestCase):
     def test_dump_kwargs_false(self):
         # prepare dump output file
         tmp_file = os.path.join(utils.get_tmp_dir(), 'test_dump_kwargs_false.dump.txt')
-        utils.check_makedir(tmp_file)  # make sure path is clear for writing
+        utils.check_makedir(os.path.dirname(tmp_file))  # make sure path is clear for writing
         utils.clean_paths(tmp_file)
         # prepare command
         cmd = 'hostname'  # works on all machine types?
@@ -103,7 +103,7 @@ class Testiexec(unittest.TestCase):
 
         # debug
         tmp_file = os.path.join(utils.get_tmp_dir(), 'test_streaming_command.lines.csv')
-        utils.check_makedir(tmp_file)  # make sure path is clear for writing
+        utils.check_makedir(os.path.dirname(tmp_file))  # make sure path is clear for writing
         utils.clean_paths(tmp_file)
         utils.write_csv(tmp_file, out_lines_with_timestamp, ['timestamp', 'contents'])
         log.trace('tmp_file: path={}'.format(tmp_file))
