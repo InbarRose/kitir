@@ -261,6 +261,33 @@ class RestfulAPI(object):
         return self._request_put(url, **kwargs)
 
     @classmethod
+    def _request_patch(cls, url, **kwargs):
+        """sends a PATCH command using requests package"""
+        log_action = kwargs.pop('log_action', True)
+        session = kwargs.pop('session', None)
+        kwargs.setdefault('timeout', cls.request_timeout)
+        log_kwargs, kwargs = cls._extract_log_kwargs(**kwargs)
+        if log_action:
+            log.debug('request.patch: url={}'.format(url))
+        try:
+            if session:
+                r = session.patch(url, **kwargs)
+            else:
+                r = requests.patch(url, **kwargs)
+        except requests.RequestException as exc:
+            log.error('requests patch exception: exc={} url={}'.format(exc, url))
+            raise
+        else:
+            cls._log_transaction(r, **log_kwargs)
+        return r
+
+    def request_patch(self, url, **kwargs):
+        """sends a PATCH command using requests package"""
+        self.__add_default_log_dirs_to_kwargs(kwargs)
+        kwargs.setdefault('session', self.session)
+        return self._request_patch(url, **kwargs)
+
+    @classmethod
     def _request_delete(cls, url, **kwargs):
         """sends a DELETE command using requests package"""
         log_action = kwargs.pop('log_action', True)
