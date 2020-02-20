@@ -43,6 +43,7 @@ class RestfulAPI(object):
     _ignored_json_convert_error_messages = [
         'Extra data',
         'No JSON object could be decoded',
+        "Expecting value"
     ]
     # this file format is here so it can be extended easily
     _format_counter_id = '{id:03}'
@@ -148,7 +149,7 @@ class RestfulAPI(object):
         """log the response side of a transaction"""
         content = cls._get_content_from_json(response)
         if content is not None:
-            data_file = utils.write_file(response_file_path, json.dumps(content, indent=4))
+            data_file = utils.write_file(response_file_path, content)
             log.trace('log-response: status={} data={}'.format(response.status_code, data_file))
         else:
             log.trace('log-response: status={} data=None'.format(response.status_code))
@@ -158,6 +159,8 @@ class RestfulAPI(object):
         """attempts to extract content from a json in the response from server"""
         try:
             content = response.json()
+        # except json.JSONDecodeError as jde:
+        #
         except ValueError as vexc:
             if not any([ignored_msg in str(vexc) for ignored_msg in cls._ignored_json_convert_error_messages]):
                 raise
@@ -165,6 +168,8 @@ class RestfulAPI(object):
                 content = response.content
             else:
                 content = None
+        else:
+            content = json.dumps(content, indent=4)
         return content
 
     @classmethod
