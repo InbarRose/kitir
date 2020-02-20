@@ -132,3 +132,5 @@ dmypy.json
 build
 dist
 .idea
+log/
+artifact/
