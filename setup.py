@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name="kitir",
-    version="1.0.2",
+    version="1.0.3",
     author="Inbar Rose",
     author_email="inbar.rose1@gmail.com",
     python_requires=">=3.7.4",
