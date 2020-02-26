@@ -166,7 +166,7 @@ class RestfulAPI(object):
             'url': req.url,
             'headers': req.headers,
             'method': req.method,
-            'body': req.body,
+            'body': cls._get_body_from_req(req),
             '__meta__': 'PreparedRequest object: not Request object'
         }
         utils.write_json(request_file_path, data, json_kwargs={'indent': 4, 'sort_keys': True})
@@ -180,7 +180,7 @@ class RestfulAPI(object):
             'ok': response.ok,
             'url': response.url,
             'headers': response.headers,
-            'elapsed': response.elapsed,
+            'elapsed': str(response.elapsed),
             'status_code': response.status_code,
             'content': cls._get_content_from_response(response),
             'encoding': response.encoding,
@@ -211,6 +211,16 @@ class RestfulAPI(object):
             log.trace('log-response: status={} data={}'.format(response.status_code, data_file))
         else:
             log.trace('log-response: status={} data=None'.format(response.status_code))
+
+    @classmethod
+    def _get_body_from_req(cls, req):
+        """attempts to extract body from req as json, if fails, gets raw body (as string)"""
+        assert isinstance(req, requests.PreparedRequest)
+        try:
+            body = json.loads(req.body)
+        except TypeError:
+            body = req.body.decode('utf-8', errors='replace')
+        return body
 
     @classmethod
     def _get_content_from_response(cls, response):
