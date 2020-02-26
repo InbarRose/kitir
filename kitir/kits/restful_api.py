@@ -234,7 +234,7 @@ class RestfulAPI(object):
             if not any([ignored_msg in str(vexc) for ignored_msg in cls._ignored_json_convert_error_messages]):
                 raise
             elif response.content:
-                content = response.content
+                content = response.content.decode('utf-8', errors='replace')
             else:
                 content = None
         else:
