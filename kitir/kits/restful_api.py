@@ -164,7 +164,7 @@ class RestfulAPI(object):
         assert isinstance(req, requests.PreparedRequest)
         data = {
             'url': req.url,
-            'headers': req.headers,
+            'headers': dict(req.headers),
             'method': req.method,
             'body': cls._get_body_from_req(req),
             '__meta__': 'PreparedRequest object: not Request object'
@@ -179,10 +179,10 @@ class RestfulAPI(object):
         data = {
             'ok': response.ok,
             'url': response.url,
-            'headers': response.headers,
+            'headers': dict(response.headers),
             'elapsed': str(response.elapsed),
             'status_code': response.status_code,
-            'content': cls._get_content_from_response(response),
+            'content': cls._get_content_from_response(response, prefer_json=True),
             'encoding': response.encoding,
             'apparent_encoding': response.apparent_encoding,
             'is_redirect': response.is_redirect,
@@ -216,6 +216,8 @@ class RestfulAPI(object):
     def _get_body_from_req(cls, req):
         """attempts to extract body from req as json, if fails, gets raw body (as string)"""
         assert isinstance(req, requests.PreparedRequest)
+        if not req.body:
+            return req.body
         try:
             body = json.loads(req.body)
         except TypeError:
@@ -223,12 +225,11 @@ class RestfulAPI(object):
         return body
 
     @classmethod
-    def _get_content_from_response(cls, response):
+    def _get_content_from_response(cls, response, prefer_json=False):
         """attempts to extract content from response as json, if fails, gets raw content"""
         try:
             content = response.json()
         # except json.JSONDecodeError as jde:
-        #
         except ValueError as vexc:
             if not any([ignored_msg in str(vexc) for ignored_msg in cls._ignored_json_convert_error_messages]):
                 raise
@@ -237,7 +238,8 @@ class RestfulAPI(object):
             else:
                 content = None
         else:
-            content = json.dumps(content, indent=4)
+            if not prefer_json:
+                content = json.dumps(content, indent=4)
         return content
 
     @classmethod
