@@ -21,7 +21,7 @@ Compiled over many years of use, gathered here and organized.
 
 > To get the development version
 
-`pip install git+git://github.com/InbarRose/kitir@master#egg=kitir`
+`pip install git+git://github.com/InbarRose/kitir@development#egg=kitir`
 
 ## Usage
 
