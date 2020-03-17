@@ -75,7 +75,7 @@ class TestWait(unittest.TestCase):
             (dt_end - datetime.datetime(1970, 1, 1)).total_seconds(),
             delta=1
         )
-        self.assertAlmostEqual(2, duration.total_seconds(), places=2)
+        self.assertAlmostEqual(2, duration.total_seconds(), delta=0.1)
 
     def test_wait_for_all(self):
         start = time.time()
