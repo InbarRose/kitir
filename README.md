@@ -6,7 +6,10 @@ This is a Python3 version of my old project https://github.com/InbarRose/irtools
 
 ## News:
 
-> Fresh out of the oven!
+> Now hosted on pypi !
+
+https://pypi.org/project/kitir/
+
 
 ## What is it?
 
@@ -15,7 +18,11 @@ Compiled over many years of use, gathered here and organized.
 
 ## Installing with pip
 
-> To get the most stable version (**recommended**) 
+> To get the most stable version from Pypi (**recommended**) 
+
+`pip install kitir`
+
+> To get the most recent master version
 
 `pip install git+git://github.com/InbarRose/kitir@master#egg=kitir`
 
