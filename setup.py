@@ -8,7 +8,7 @@ except:
 
 setuptools.setup(
     name="kitir",
-    version="1.0.7",
+    version="1.0.8",
     author="Inbar Rose",
     author_email="inbar.rose1@gmail.com",
     python_requires=">=3.7.4",
