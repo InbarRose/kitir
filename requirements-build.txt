@@ -1,2 +1,16 @@
+# for local development
 bump2version>=1.0.0
+
+# for testing
 pytest
+
+# from requirements.txt
+pytz
+requests
+
+# for building (generating distribution archives)
+setuptools
+wheel
+
+# for uploading to PyPi
+twine
